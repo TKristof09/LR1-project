@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <errno.h>
 
 #define REJETTE 0
@@ -15,10 +16,17 @@ struct Transition
 };
 typedef struct Transition Transition;
 
+struct Reduit
+{
+	char k;
+	char A;
+};
+typedef struct Reduit Reduit;
 struct Automaton
 {
 	int num_states;
 	Transition** transitions;	// size n* 128, usage: transitions[cur_state][character]
+	Reduit* reduits; // size n, usage reduits[cur_state]
 
 };
 typedef struct Automaton Automaton;
@@ -73,10 +81,44 @@ Automaton ParseAutomaton(char* filename)
 		int k = buffer[i];
 		int A = buffer[i + (n+1)];
 
+		res.reduits[i].k = k;
+		res.reduits[i].A = A;
+	}
+
+	fscanf(f, "\n");
+
+	// read decale(s,c)
+	char* buf = malloc(3 * sizeof(char));
+	fread(buf, sizeof(char), 3, f);
+	while(buf[0] != '\255' && buf[1] != '\255' && buf[2] != '\255')
+	{
+		fread(buf, sizeof(char), 3, f);
+		char s = buf[0];
+		char c = buf[1];
+		char ss = buf[2];
+
+		res.transitions[s][c].value = ss;
+
+	}
+
+
+	// read branchement(s,A)
+	fread(buf, sizeof(char), 3, f);
+	while(buf[0] != '\255' && buf[1] != '\255' && buf[2] != '\255')
+	{
+		fread(buf, sizeof(char), 3, f);
+		char s = buf[0];
+		char A = buf[1];
+		char ss = buf[2];
+
+		res.transitions[s][A].value = ss;
+
 	}
 
 
 
-
 	fclose(f);
+
+
+	return res;
 }
