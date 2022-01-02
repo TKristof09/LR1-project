@@ -1,3 +1,6 @@
+#ifndef STACK_H
+#define STACK_H
+
 #include <stdlib.h>
 
 struct Node
@@ -7,25 +10,14 @@ struct Node
 };
 typedef struct Node* Stack;
 
-int IsEmpty(Stack s)
-{
-	return s == NULL;
-}
+int IsEmpty(Stack s);
 
-void Push(char v, Stack* s)
-{
-	Stack news = (Stack)malloc(sizeof(Node));
-	news->value = v;
-	news->next = *s;
+void Push(char v, Stack* s);
 
-	*s = news;
-}
+char Pop(Stack* s);
 
-char Pop(Stack* s)
-{
-	char res = (*s)->value;
-	*s = (*s)->next;
+char Peek(Stack s);
 
-	return res;
-}
+void PrintStack(Stack s);
 
+#endif
