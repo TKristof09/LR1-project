@@ -1,18 +1,18 @@
-OBJS	= main.o stack.o
-SOURCE	= main.c stack.c
-HEADER	= stack.h
+OBJS	= main.o stack.o automaton.o
 OUT	= automaton
-CC	 = gcc
-FLAGS	 = -c -Wall -g
+CC	 = gcc -Wall
 
 all: $(OBJS)
-	$(CC) -g $(OBJS) -o $(OUT)
+	$(CC) $(OBJS) -o $(OUT)
 
-main.o: main.c
-	$(CC) $(FLAGS) main.c
+main.o: main.c automaton.h stack.h
+	$(CC) -c main.c
 
-stack.o: stack.c
-	$(CC) $(FLAGS) stack.c
+stack.o: stack.c stack.h
+	$(CC) -c stack.c
+
+automaton.o: stack.o automaton.h
+	$(CC) -c automaton.c
 
 
 clean:

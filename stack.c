@@ -1,6 +1,12 @@
 #include "stack.h"
 #include <stdio.h>
 
+
+Stack CreateStack()
+{
+	return NULL;
+}
+
 int IsEmpty(Stack s)
 {
 	return s == NULL;
