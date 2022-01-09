@@ -32,7 +32,12 @@ Automaton ParseAutomaton(char* filename)
 		exit(1);
 	}
 	int n;
-	fscanf(f, "a %i\n", &n);
+	int ok = fscanf(f, "a %i\n", &n);
+	if(ok == 0)
+	{
+		printf("The automaton file is incorrect");
+		exit(2);
+	}
 
 	// Allocate arrays for transitions
 	res.num_states = n;
@@ -52,16 +57,17 @@ Automaton ParseAutomaton(char* filename)
 
 	char* buffer = malloc(n * 128);
 	fread(buffer, 1, n * 128, f);
-	// save actions
+
+	// read transition types
 	for(int s = 0; s < n; s++)
 	{
-		// default init the array
+		// default initialise the array
 		res.reduces[s].k = -1;
 		res.reduces[s].A = -1;
 
 		for(int c = 0; c < 128; c++)
 		{
-			// default init the 3 arrays
+			// default initialise the 3 arrays
 			res.shifts[s][c] = -1;
 			res.branchings[s][c] = -1;
 			res.types[s][c] = -1;
@@ -131,7 +137,7 @@ Automaton ParseAutomaton(char* filename)
 	return res;
 }
 
-// The recursion stops if the automaton is correct and contains at least one Accept or Reject transition
+// The recursion stops if the automaton is correct (see "Limites du programme" paragraph in the rapport)
 int Execute(Automaton aut, Stack* s, char* text, int* outErrorPos)
 {
 	//PrintStack(*s);

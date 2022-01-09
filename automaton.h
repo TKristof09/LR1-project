@@ -18,8 +18,8 @@ struct Automaton
 {
 	int num_states;
 	Type** types;
-	State** shifts;	// size n* 128, usage: transitions[cur_state][character]
-	Reduce* reduces; // size n, usage reduits[cur_state]
+	State** shifts;	// size n* 128, usage: shifts[cur_state][character]
+	Reduce* reduces; // size n, usage reduces[cur_state]
 	State** branchings;
 
 };

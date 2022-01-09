@@ -1,0 +1,135 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{fullpage}
+\usepackage{color}
+\usepackage[table]{xcolor}
+\usepackage{listings}
+
+\definecolor{darkWhite}{rgb}{0.94,0.94,0.94}
+
+\lstset{
+  aboveskip=3mm,
+  belowskip=-2mm,
+  basicstyle=\footnotesize,
+  breakatwhitespace=false,
+  breaklines=true,
+  captionpos=b,
+  commentstyle=\color{green},
+  deletekeywords={...},
+  escapeinside={\%*}{*)},
+  extendedchars=true,
+  keepspaces=true,
+  keywordstyle=\color{blue},
+  language=C,
+  literate=
+  {²}{{\textsuperscript{2}}}1
+  {⁴}{{\textsuperscript{4}}}1
+  {⁶}{{\textsuperscript{6}}}1
+  {⁸}{{\textsuperscript{8}}}1
+  {€}{{\euro{}}}1
+  {é}{{\'e}}1
+  {è}{{\`{e}}}1
+  {ê}{{\^{e}}}1
+  {ë}{{\¨e}}}1
+  {É}{{\'{E}}}1
+  {Ê}{{\^{E}}}1
+  {û}{{\^{u}}}1
+  {ù}{{\`{u}}}1
+  {â}{{\^{a}}}1
+  {à}{{\`{a}}}1
+  {á}{{\'{a}}}1
+  {ã}{{\~{a}}}1
+  {Á}{{\'{A}}}1
+  {Â}{{\^{A}}}1
+  {Ã}{{\~{A}}}1
+  {ç}{{\c{c}}}1
+  {Ç}{{\c{C}}}1
+  {õ}{{\~{o}}}1
+  {ó}{{\'{o}}}1
+  {ô}{{\^{o}}}1
+  {Õ}{{\~{O}}}1
+  {Ó}{{\'{O}}}1
+  {Ô}{{\^{O}}}1
+  {î}{{\^{i}}}1
+  {Î}{{\^{I}}}1
+  {í}{{\'{i}}}1
+  {Í}{{\~{Í}}}1,
+  morekeywords={*,...},
+  rulecolor=\color{black},
+  showspaces=false,
+  showstringspaces=false,
+  showtabs=false,
+  stepnumber=1,
+  stringstyle=\color{gray},
+  tabsize=4,
+  title=\lstname,
+}
+\title{Rapport du projet IPI}
+\author{Kristof Toth}
+
+\begin{document}
+
+\maketitle
+
+\section{Modules}
+J'ai organisé le projet en un fichier main.c très court et 2 modules:
+\subsection{Stack}
+
+Pour cette structure de données j'ai décidé de choisir une implémentation par une liste chaînée pour ne pas être limité à un nombre fixe d'éléments dans la pile. Je l'ai implémenté comme dans le cours avec le seul exception que j'ai aussi crée une fonction \lstinline{char Peek(Stack s);} qui retourne l'élément au sommet du pile sans l'enlever.
+\subsection{Automaton}
+
+Tout d'abord j'ai crée un enum pour les différent types de transitions dans l'automate afin de rendre le code plus lisible:
+\begin{lstlisting}
+enum Type {REJECT, ACCEPT, SHIFT, REDUCE};
+\end{lstlisting}
+Et pour représenter un automate j'ai choisi d'utiliser la structure suivante:
+\begin{lstlisting}
+typedef char State;
+struct Reduce
+{
+	char k;
+	char A;
+};
+typedef struct Reduce Reduce;
+struct Automaton
+{
+	int num_states;
+	Type** types;
+	State** shifts;
+	Reduce* reduces;
+	State** branchings;
+
+};
+\end{lstlisting}
+
+J'ai choisi de stocker les transitions sous forme de tableaux pour pouvoir accéder facilement aux transitions en utilisant l'état actuel et le caractère actuel comme indices d'abord dans le tableau \lstinline{types} puis dans le tableau correspondant au type de la transition.
+
+\section{Fonctionnement}
+
+\subsection{Lecture de fichiers .aut}
+
+La lecture de fichiers .aut et la création d'un \lstinline{Automaton} était assez simple grâce à la structure choisi pour représenter un automate, je n'avais qu'à parcourir le fichier avec des boucles simples pour chaque type de transition et remplir le tableau correspondant.
+
+\subsection{Fonctionnement d'un automate}
+
+Pour vérifier si un mot est accepté par l'automate j'ai décidé d'utiliser une fonction récursive
+\lstinline{int Execute(Automaton, Stack*, char*)} pour itérer jusqu'à arriver à une transition REJECT ou ACCEPT où la fonction retourne le résultat. Cette méthode d'itération me semblait plus adapté qu'une simple boucle \lstinline{for} ou \lstinline{while} parce qu'un automate est essentiellement un graphe.
+
+\section{Questions bonus}
+\subsection{L'indication de l'erreur}
+L'implémentation de cette fonctionnalité était très simple, j'ai du seulement ajouter une paramètre  supplémentaire \lstinline{int* outErrorPos} à la fonction \lstinline{Execute} dont j'ai augmenté la valeur à chaque transition de type \lstinline{SHIFT} quand on passe à la lettre suivante dans le mot.
+
+\subsection{Création d'un fichier DOT}
+Cette question m'a posé quelques difficultés notamment pour la structure d'un fichier DOT, mais une fois que j'ai compris comment fonctionne le langage DOT l'implémentation est devenu assez facile. J'ai utilisé une boucle \lstinline{for} pour parcourir les états de l'automate puis une deuxième boucle pour parcourir tous les caractères et utiliser \lstinline{fprintf} pour écrire dans le fichier DOT une ligne en fonction du type de transition correspondant. Mais j'avais encore un problème pour les caractères spéciaux comme \textbackslash n ou \textbackslash 0 qui créait des problèmes dans le fichier, donc j'ai du créer une fonction qui remplace ces deux caractères avec \textbackslash \textbackslash n et \textbackslash \textbackslash 0 pour pouvoir les afficher dans le DOT.
+
+\section{Limites du programme}
+\begin{itemize}
+    \item Si l'automate n'est pas défini correctement, par exemple ne contient aucun état ACCEPT ou REJECT ou s'il contient un état Q qui n'a que des transitions Q $\rightarrow$ Q pour toute lettre alors la fonction récursive \lstinline{Execute} ne s'arrêtera jamais.
+    \item Le programme ne peut lire que 256 caractères sur stdin à la fois.
+    \item Dans le fichier DOT le programme crée une arête pour chaque transition donc si l'automate contient beaucoup de transition entre deux états le graphe créé peut devenir illisible (voir le graphe pour le fichier words.aut où il y a une arête pour chaque lettre de l'alphabet en minuscule et en majuscule).
+\end{itemize}
+
+\end{document}
+

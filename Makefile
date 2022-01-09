@@ -1,5 +1,5 @@
-OBJS	= main.o stack.o automaton.o
 OUT	= automaton
+OBJS	= main.o stack.o automaton.o
 CC	 = gcc -Wall
 
 all: $(OBJS)
